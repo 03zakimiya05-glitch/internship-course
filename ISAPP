@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ★★★ブラウザのタブに表示されるタイトルを変更する場合はここ★★★ -->
+    <title>Next Step Finder - コース診断</title>
+    
+    <!-- Tailwind CSS (スタイリング用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (アイコン用) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* アニメーション用のCSS */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(2rem); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slide-in { animation: slideInRight 0.3s ease-out forwards; }
+        .animate-zoom-in { animation: zoomIn 0.5s ease-out forwards; }
+        
+        .step-container { display: none; }
+        .step-container.active { display: flex; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 flex flex-col items-center py-10 px-4 font-sans text-slate-800">
+
+    <!-- ★★★ヘッダー部分（ロゴやタイトル）★★★ -->
+    <header class="mb-8 text-center w-full max-w-2xl">
+        <div class="inline-flex items-center justify-center p-2 bg-orange-600 text-white rounded-2xl mb-4 shadow-lg shadow-orange-200">
+            <!-- アップロードされた画像ファイルに変更 -->
+            <img src="縦型ホワイトブランドロゴ.gif" alt="ブランドロゴ" class="w-12 h-12 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/100x100/ea580c/white?text=Logo';">
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+            Next Step Finder
+        </h1>
+        <p class="text-slate-500 mt-2 text-sm md:text-base">
+            28卒 インターンシップ参加者向け コース診断
+        </p>
+    </header>
+
+    <main class="w-full max-w-xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden relative min-h-[400px] flex flex-col">
+        
+        <!-- --- スタート画面 --- -->
+        <div id="step-start" class="step-container active flex-1 flex-col items-center justify-center p-8 md:p-12 text-center animate-fade-in">
+            <!-- ★★★最初の画面のメッセージ★★★ -->
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 mb-4">
+                あなたに最適な<br class="md:hidden" />次のステップは？
+            </h2>
+            <p class="text-slate-600 mb-8 leading-relaxed">
+                1回目のインターンシップの参加形態と、5つの簡単な質問から、あなた自身の強みや志向性を分析します。<br />
+                結果に基づいて、次回ご案内する最適なコースをご提案します。
+            </p>
+            <button onclick="handleStart()" class="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-orange-600 rounded-xl hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-600 w-full md:w-auto">
+                診断をスタートする
+                <i data-lucide="play" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+        </div>
+
+        <!-- --- 氏名入力画面 --- -->
+        <div id="step-identification" class="step-container flex-1 flex-col p-8 md:p-12 animate-slide-in">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="user-circle" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-xl font-bold mb-2">お名前の入力</h2>
+                <p class="text-slate-500 text-sm">
+                    診断結果を記録するため、<br />
+                    氏名（フルネーム）を入力してください。
+                </p>
+            </div>
+            
+            <form id="nameForm" onsubmit="handleNameSubmit(event)" class="flex flex-col gap-4 max-w-sm mx-auto w-full">
+                <div>
+                    <!-- ★★★入力項目のラベルやプレースホルダーを変更★★★ -->
+                    <label for="studentNameInput" class="block text-sm font-medium text-slate-700 mb-1">氏名</label>
+                    <input type="text" id="studentNameInput" required placeholder="例: 採用 太郎" oninput="checkNameInput()" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-slate-50 focus:bg-white">
+                </div>
+                <button type="submit" id="nameSubmitBtn" disabled class="mt-4 flex items-center justify-center px-6 py-4 font-bold text-white transition-all duration-200 bg-slate-900 rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                    次へ進む
+                    <i data-lucide="chevron-right" class="ml-2 w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- --- 参加形態選択画面 --- -->
+        <div id="step-type" class="step-container flex-1 flex-col p-8 md:p-12 animate-slide-in">
+            <h2 class="text-xl font-bold text-center mb-2">Q0. 参加形態の確認</h2>
+            <p class="text-slate-500 text-center mb-8 text-sm">
+                あなたが参加した（または参加予定の）<br class="md:hidden" />1回目のインターンシップはどちらですか？
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="handleTypeSelect('offline')" class="flex flex-col items-center justify-center p-6 border-2 border-slate-200 rounded-2xl hover:border-orange-500 hover:bg-orange-50 transition-all group">
+                    <div class="w-16 h-16 bg-slate-100 group-hover:bg-orange-100 rounded-full flex items-center justify-center mb-4 transition-colors">
+                        <i data-lucide="users" class="w-8 h-8 text-slate-600 group-hover:text-orange-600"></i>
+                    </div>
+                    <span class="font-bold text-lg text-slate-800">対面</span>
+                    <span class="text-sm text-slate-500 mt-2">オフィス・会場で開催</span>
+                </button>
+                
+                <button onclick="handleTypeSelect('online')" class="flex flex-col items-center justify-center p-6 border-2 border-slate-200 rounded-2xl hover:border-orange-500 hover:bg-orange-50 transition-all group">
+                    <div class="w-16 h-16 bg-slate-100 group-hover:bg-orange-100 rounded-full flex items-center justify-center mb-4 transition-colors">
+                        <i data-lucide="monitor" class="w-8 h-8 text-slate-600 group-hover:text-orange-600"></i>
+                    </div>
+                    <span class="font-bold text-lg text-slate-800">オンライン</span>
+                    <span class="text-sm text-slate-500 mt-2">Zoom・Teams等で開催</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- --- 質問画面 --- -->
+        <div id="step-quiz" class="step-container flex-1 flex-col p-8 md:p-12 animate-fade-in">
+            <div class="mb-8">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-sm font-bold text-orange-600" id="quizHeader">Question 1</span>
+                    <span class="text-xs text-slate-400 font-medium" id="quizProgressText">1 / 5</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="quizProgressBar" class="bg-orange-600 h-full rounded-full transition-all duration-500 ease-out" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col">
+                <h3 id="questionText" class="text-xl md:text-2xl font-bold text-slate-800 mb-8 leading-relaxed">
+                    <!-- JavaScriptから質問文が入ります -->
+                </h3>
+                <div id="optionsContainer" class="space-y-3 mt-auto">
+                    <!-- JavaScriptから選択肢ボタンが入ります -->
+                </div>
+            </div>
+        </div>
+
+        <!-- --- 計算中画面 --- -->
+        <div id="step-calculating" class="step-container flex-1 flex-col items-center justify-center p-12 text-center">
+            <div class="relative w-20 h-20 mb-6">
+                <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-orange-600 rounded-full border-t-transparent animate-spin"></div>
+                <i data-lucide="sparkles" class="absolute inset-0 m-auto w-8 h-8 text-orange-600 animate-pulse"></i>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">回答を分析中...</h2>
+            <p class="text-slate-500 text-sm">あなたに最適なコースを判定しています</p>
+        </div>
+
+        <!-- --- 結果＆日程選択画面 --- -->
+        <div id="step-result" class="step-container flex-1 flex-col animate-zoom-in">
+            <div id="resultHeaderColor" class="bg-orange-50 p-8 text-center border-b border-slate-100 relative">
+                <div class="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-slate-600 shadow-sm border border-slate-200">
+                    <span id="resultStudentNameBadge"></span> さん
+                </div>
+                
+                <p class="text-sm font-bold text-slate-500 mb-2 uppercase tracking-widest mt-4">Your Personality</p>
+                <h2 id="resultPersonalityType" class="text-xl md:text-2xl font-black text-slate-800 mb-4 bg-white inline-block px-4 py-2 rounded-xl shadow-sm border border-slate-100">
+                    <!-- 性格タイプ -->
+                </h2>
+                
+                <p class="text-xs font-bold text-slate-400 mb-1 uppercase tracking-widest">Recommended Course</p>
+                <h3 id="resultCourseName" class="text-xl md:text-2xl font-bold text-orange-600 mb-2">
+                    <!-- コース名 -->
+                </h3>
+            </div>
+
+            <div class="p-8">
+                <h3 class="text-base font-bold text-slate-800 mb-4 text-center">参加希望日程を選択してください</h3>
+                
+                <div id="dateSelectionContainer" class="space-y-3 mb-8">
+                    <!-- JavaScriptから日程選択ボタンが入ります -->
+                </div>
+
+                <button id="submitEntryBtn" onclick="submitData()" disabled class="w-full flex items-center justify-center px-6 py-4 font-bold text-white transition-all duration-200 bg-slate-300 rounded-xl cursor-not-allowed">
+                    日程を確定してエントリーする
+                    <i data-lucide="arrow-right" class="ml-2 w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- --- データ保存中画面 --- -->
+        <div id="step-saving" class="step-container flex-1 flex-col items-center justify-center p-12 text-center animate-fade-in">
+            <div class="relative w-20 h-20 mb-6 flex items-center justify-center text-orange-600">
+                <i data-lucide="database" class="w-10 h-10 animate-bounce"></i>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-2">エントリー受付中...</h2>
+            <p class="text-slate-500 text-sm">情報をデータベースに保存しています</p>
+        </div>
+
+        <!-- --- 完了画面 --- -->
+        <div id="step-finish" class="step-container flex-1 flex-col items-center justify-center p-8 md:p-12 animate-zoom-in">
+            <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6">
+                <i data-lucide="check-circle-2" class="w-12 h-12 text-green-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">エントリー完了</h2>
+            <p class="text-slate-600 mb-8 text-center leading-relaxed">
+                <span id="finishStudentName" class="font-bold"></span>さんの<br/>
+                <span id="finishCourseName" class="font-bold text-orange-600"></span>（<span id="finishDate" class="font-bold"></span>）<br/>
+                へのエントリーを受け付けました。
+            </p>
+            
+            <div class="space-y-3 w-full">
+                <button class="w-full flex items-center justify-center px-6 py-4 font-bold text-slate-700 transition-all duration-200 bg-slate-100 rounded-xl hover:bg-slate-200">
+                    マイページへ戻る
+                </button>
+                <button onclick="resetQuiz()" class="w-full flex items-center justify-center px-6 py-3 font-medium text-slate-500 transition-all duration-200 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
+                    <i data-lucide="refresh-ccw" class="mr-2 w-4 h-4"></i>
+                    もう一度診断する
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-8 text-center text-slate-400 text-xs pb-10">
+        &copy; 2026 Recruitment Team. All rights reserved.
+    </footer>
+
+    <!-- アプリのロジック (JavaScript) -->
+    <script>
+        // =====================================================================
+        // 【設定エリア】ここから下のデータを書き換えることでアプリをカスタマイズできます
+        // =====================================================================
+        
+        // ★★★GASのURL（必須）★★★
+        // 前回のステップで取得したGASのURLをここに貼り付けてください。
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzd-_qlEOfLz6H9JmlFEkr8JVBVoYLslbI2IHQE4dFfjd6hEpo-OfaCFgWrYXvUS5SOjw/exec"; 
+
+        // ★★★質問内容の設定★★★
+        // 質問と選択肢ごとの点数（加点・減点）を設定しています
+        const questions = [
+            {
+                id: 1,
+                text: "課題に取り組む際",
+                options: [
+                    { text: "直観を重視する", score: 1 },
+                    { text: "時間をかけて慎重に", score: -1 },
+                    { text: "どちらでもない", score: 0 }
+                ]
+            },
+            {
+                id: 2,
+                text: "交友関係のタイプは？",
+                options: [
+                    { text: "広く浅いタイプ", score: 1 },
+                    { text: "狭く深いタイプ", score: -1 },
+                    { text: "どちらでもない", score: 0 }
+                ]
+            },
+            {
+                id: 3,
+                text: "悩み事があるとき",
+                options: [
+                    { text: "深く考えずほかの事に打ち込める", score: 1 },
+                    { text: "悩み事が気になって他の事が手につかなくなる", score: -1 },
+                    { text: "悩みがない", score: 2 } // ★ここだけ2点加点
+                ]
+            },
+            {
+                id: 4,
+                text: "友達と予定を立てるとき",
+                options: [
+                    { text: "積極的に自分が決める", score: 1 },
+                    { text: "友人に合わせる", score: -1 },
+                    { text: "どちらでもない", score: 0 }
+                ]
+            },
+            {
+                id: 5,
+                text: "目標について",
+                options: [
+                    { text: "長い目で見た時の大きい目標を立てる", score: 1 },
+                    { text: "近い将来達成できるタスク的な目標を立てる", score: -1 },
+                    { text: "どちらでもない", score: 0 }
+                ]
+            }
+        ];
+
+        // ★★★コース内容と性格タイプの設定★★★
+        // dates（日程）の配列を追加しました
+        const courseData = {
+            A: {
+                name: "Aコース",
+                personalityType: "自分を信じて突き進むリーダータイプ！",
+                dates: ["8月1日10:00～", "8月20日10:00～", "8月22日10:00～"],
+                color: "bg-orange-600",
+                lightColor: "bg-orange-50",
+                textColor: "text-orange-600"
+            },
+            B: {
+                name: "Bコース",
+                personalityType: "着実に成果を上げる慎重派プロタイプ！",
+                dates: ["8月1日14:00～", "8月7日14:00～", "8月22日14:00～"],
+                color: "bg-emerald-600",
+                lightColor: "bg-emerald-50",
+                textColor: "text-emerald-600"
+            },
+            C: {
+                name: "Cコース",
+                personalityType: "枠にとらわれないアイデアマンタイプ！",
+                dates: ["8月1日10:00～", "8月20日10:00～", "8月22日10:00～"], // ※仮でAコースと同じにしています
+                color: "bg-indigo-600",
+                lightColor: "bg-indigo-50",
+                textColor: "text-indigo-600"
+            },
+            D: {
+                name: "Dコース",
+                personalityType: "冷静沈着なロジカルシンカータイプ！",
+                dates: ["8月1日14:00～", "8月7日14:00～", "8月22日14:00～"], // ※仮でBコースと同じにしています
+                color: "bg-violet-600",
+                lightColor: "bg-violet-50",
+                textColor: "text-violet-600"
+            }
+        };
+
+        // =====================================================================
+        // ここから下はシステムの動作に関わるプログラムです（基本的には変更不要）
+        // =====================================================================
+
+        let state = {
+            studentName: '',
+            internType: null,
+            currentQuestionIndex: 0,
+            totalScore: 0,
+            answers: [],
+            resultCourse: null,
+            selectedDate: null // 追加：選択された日程
+        };
+
+        lucide.createIcons();
+
+        function setStep(stepId) {
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${stepId}`).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function handleStart() {
+            setStep('identification');
+        }
+
+        function checkNameInput() {
+            const input = document.getElementById('studentNameInput').value.trim();
+            document.getElementById('nameSubmitBtn').disabled = input === '';
+        }
+
+        function handleNameSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('studentNameInput').value.trim();
+            if (input !== '') {
+                state.studentName = input;
+                setStep('type');
+            }
+        }
+
+        function handleTypeSelect(type) {
+            state.internType = type;
+            renderQuestion();
+            setStep('quiz');
+        }
+
+        function renderQuestion() {
+            const q = questions[state.currentQuestionIndex];
+            
+            document.getElementById('quizHeader').innerText = `Question ${state.currentQuestionIndex + 1}`;
+            document.getElementById('quizProgressText').innerText = `${state.currentQuestionIndex + 1} / ${questions.length}`;
+            document.getElementById('quizProgressBar').style.width = `${((state.currentQuestionIndex + 1) / questions.length) * 100}%`;
+            document.getElementById('questionText').innerText = q.text;
+
+            // 各質問に設定された専用の選択肢（q.options）を描画する
+            const optionsHtml = q.options.map(opt => `
+                <button onclick="handleAnswer(${opt.score})" class="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:border-orange-500 hover:bg-orange-50 hover:shadow-sm transition-all group text-left">
+                    <span class="font-medium text-slate-700 group-hover:text-orange-700">${opt.text}</span>
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-slate-300 group-hover:text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                </button>
+            `).join('');
+            
+            document.getElementById('optionsContainer').innerHTML = optionsHtml;
+            lucide.createIcons();
+        }
+
+        function handleAnswer(score) {
+            state.totalScore += score;
+            state.answers.push(score);
+            
+            if (state.currentQuestionIndex < questions.length - 1) {
+                state.currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                calculateResult(); // 関数名を変更し、保存処理を分離しました
+            }
+        }
+
+        async function calculateResult() {
+            setStep('calculating');
+            
+            const isHighScorer = state.totalScore >= 1;
+            let course = '';
+
+            if (state.internType === 'offline') {
+                course = isHighScorer ? 'A' : 'B';
+            } else {
+                course = isHighScorer ? 'C' : 'D';
+            }
+            state.resultCourse = course;
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            renderResult();
+            setStep('result');
+        }
+
+        function renderResult() {
+            const courseInfo = courseData[state.resultCourse];
+            
+            document.getElementById('resultStudentNameBadge').innerText = state.studentName;
+            document.getElementById('resultPersonalityType').innerText = courseInfo.personalityType;
+            document.getElementById('resultCourseName').innerText = courseInfo.name;
+            document.getElementById('resultCourseName').className = `text-xl md:text-2xl font-bold ${courseInfo.textColor} mb-2`;
+            document.getElementById('resultHeaderColor').className = `${courseInfo.lightColor} p-8 text-center border-b border-slate-100 relative`;
+            
+            // 日程選択ボタンの生成（アイコン更新エラーを防ぐため構造を修正）
+            const dateHtml = courseInfo.dates.map(date => `
+                <button onclick="selectDate('${date}')" class="date-btn w-full flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 transition-all text-left">
+                    <span class="date-text font-bold text-slate-700">${date}</span>
+                    <span class="icon-container w-5 h-5 text-slate-400 flex items-center justify-center">
+                        <i data-lucide="calendar"></i>
+                    </span>
+                </button>
+            `).join('');
+            
+            document.getElementById('dateSelectionContainer').innerHTML = dateHtml;
+            
+            // エントリーボタンの初期化（非活性）
+            const submitBtn = document.getElementById('submitEntryBtn');
+            submitBtn.className = "w-full flex items-center justify-center px-6 py-4 font-bold text-slate-400 transition-all duration-200 bg-slate-200 rounded-xl cursor-not-allowed";
+            submitBtn.disabled = true;
+
+            lucide.createIcons();
+        }
+
+        // 日程がクリックされた時の処理
+        function selectDate(date) {
+            state.selectedDate = date;
+            const courseInfo = courseData[state.resultCourse];
+            const colorName = courseInfo.color.split('-')[1]; // bg-orange-600 -> orange を抽出
+
+            // 選択されたボタンの色を変える（アイコン部分の書き換えを修正）
+            const buttons = document.querySelectorAll('.date-btn');
+            buttons.forEach(btn => {
+                const iconContainer = btn.querySelector('.icon-container');
+                const textSpan = btn.querySelector('.date-text');
+
+                if(textSpan.innerText === date) {
+                    // 選択された状態のスタイル
+                    btn.className = `date-btn w-full flex items-center justify-between p-4 rounded-xl border-2 border-${colorName}-500 bg-${colorName}-50 transition-all text-left ring-2 ring-${colorName}-100`;
+                    iconContainer.className = `icon-container w-5 h-5 text-${colorName}-600 flex items-center justify-center`;
+                    iconContainer.innerHTML = '<i data-lucide="calendar-check-2"></i>';
+                    textSpan.className = `date-text font-bold text-${colorName}-700`;
+                } else {
+                    // 非選択状態のスタイル
+                    btn.className = `date-btn w-full flex items-center justify-between p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-slate-300 transition-all text-left opacity-60`;
+                    iconContainer.className = `icon-container w-5 h-5 text-slate-400 flex items-center justify-center`;
+                    iconContainer.innerHTML = '<i data-lucide="calendar"></i>';
+                    textSpan.className = `date-text font-bold text-slate-700`;
+                }
+            });
+            lucide.createIcons(); // アイコンの再描画
+
+            // エントリーボタンを活性化
+            const submitBtn = document.getElementById('submitEntryBtn');
+            submitBtn.disabled = false;
+            submitBtn.className = `w-full flex items-center justify-center px-6 py-4 font-bold text-white transition-all duration-200 ${courseInfo.color} rounded-xl hover:opacity-90 shadow-md cursor-pointer`;
+        }
+
+        // エントリーボタンが押された時の送信処理
+        async function submitData() {
+            setStep('saving');
+
+            try {
+                const formData = new FormData();
+                formData.append('name', state.studentName);
+                formData.append('type', state.internType === 'offline' ? '対面' : 'オンライン');
+                formData.append('score', state.totalScore);
+                formData.append('course', state.resultCourse);
+                // 追加：選択された日程
+                formData.append('date', state.selectedDate); 
+                
+                state.answers.forEach((ans, index) => {
+                    formData.append(`q${index + 1}`, ans);
+                });
+
+                if (GAS_URL !== "") {
+                    await fetch(GAS_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: formData
+                    });
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                } else {
+                    console.log("GAS_URLが設定されていないため、送信をスキップしました");
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+            } catch (error) {
+                console.error("送信エラー:", error);
+            }
+
+            // 完了画面の描画
+            document.getElementById('finishStudentName').innerText = state.studentName;
+            document.getElementById('finishCourseName').innerText = courseData[state.resultCourse].name;
+            document.getElementById('finishCourseName').className = `font-bold ${courseData[state.resultCourse].textColor}`;
+            document.getElementById('finishDate').innerText = state.selectedDate;
+            setStep('finish');
+        }
+
+        function resetQuiz() {
+            state = {
+                studentName: '',
+                internType: null,
+                currentQuestionIndex: 0,
+                totalScore: 0,
+                answers: [],
+                resultCourse: null,
+                selectedDate: null
+            };
+            document.getElementById('studentNameInput').value = '';
+            document.getElementById('nameSubmitBtn').disabled = true;
+            setStep('start');
+        }
+    </script>
+</body>
+</html>
